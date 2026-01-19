@@ -8,8 +8,9 @@ import { extractTextFromDocx, createIntegrationTextPrompt } from './utils';
 import { generateCompetencyIntegration } from './services/geminiService';
 import { injectContentIntoDocx } from './services/docxManipulator';
 
-// --- CẤU HÌNH LOGO (Đã sửa link sang CDN để không bị lỗi ảnh) ---
-const LOGO_URL = "https://lh3.googleusercontent.com/d/1zCnbX2ms0KkfftF20cGpevMQ9NN0GXF1"; 
+// --- CẤU HÌNH LOGO ---
+// Link ảnh Drive của bạn (Đã thêm cơ chế chống lỗi hiển thị bên dưới)
+const LOGO_URL = "https://drive.google.com/uc?export=view&id=1zCnbX2ms0KkfftF20cGpevMQ9NN0GXF1"; 
 
 const App: React.FC = () => {
   const [state, setState] = useState<AppState>({
@@ -90,10 +91,9 @@ const App: React.FC = () => {
   };
 
   return (
-    // Background tông Xanh Teal/Blue nhạt như giao diện mẫu
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800 selection:bg-teal-500 selection:text-white pb-20 relative overflow-x-hidden">
       
-      {/* Background blobs mới */}
+      {/* Background blobs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-teal-200/30 blur-[120px] animate-pulse-slow"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-blue-200/30 blur-[120px] animate-pulse-slow delay-1000"></div>
@@ -101,13 +101,13 @@ const App: React.FC = () => {
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         
-        {/* Header Section */}
+        {/* Header Section - ĐÃ ĐỔI TÊN MỚI TẠI ĐÂY */}
         <header className="flex flex-col md:flex-row items-center justify-between gap-6 mb-10 bg-white/80 backdrop-blur-md p-4 rounded-3xl border border-white shadow-sm">
            <div className="flex items-center gap-5">
               <div className="relative group">
                 <div className="absolute inset-0 bg-gradient-to-r from-teal-400 to-blue-500 rounded-2xl blur opacity-25 group-hover:opacity-50 transition-opacity duration-500"></div>
                 <div className="relative w-16 h-16 bg-white rounded-2xl shadow-md flex items-center justify-center overflow-hidden border border-slate-100 p-1">
-                    {/* QUAN TRỌNG: Thêm referrerPolicy="no-referrer" để Google không chặn ảnh */}
+                    {/* Thêm referrerPolicy="no-referrer" để fix lỗi ảnh Drive */}
                     <img 
                       src={LOGO_URL} 
                       alt="Logo" 
@@ -122,11 +122,13 @@ const App: React.FC = () => {
                     <style>{`.fallback-icon .icon-fallback { opacity: 1; }`}</style>
                 </div>
               </div>
+              
               <div className="text-center md:text-left">
-                <h1 className="text-2xl md:text-4xl font-black text-slate-800 tracking-tight">
-                  NLS <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-blue-600">Integrator</span> Pro
+                {/* TÊN ỨNG DỤNG MỚI */}
+                <h1 className="text-xl md:text-3xl font-black text-slate-800 tracking-tight uppercase">
+                  TÍCH HỢP <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-blue-600">NĂNG LỰC SỐ</span> TỰ ĐỘNG
                 </h1>
-                <p className="text-slate-500 font-medium text-sm mt-0.5">Hệ thống hỗ trợ dạy học thông minh</p>
+                <p className="text-slate-500 font-medium text-sm mt-0.5">Giải pháp soạn giảng thông minh 2025</p>
               </div>
            </div>
            
