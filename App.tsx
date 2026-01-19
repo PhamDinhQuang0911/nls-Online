@@ -13,7 +13,7 @@ import { injectContentIntoDocx } from './services/docxManipulator';
 const LOGO_URL = "https://drive.google.com/thumbnail?id=1zCnbX2ms0KkfftF20cGpevMQ9NN0GXF1&sz=w1000"; 
 
 // --- CẤU HÌNH GOOGLE SHEET ---
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzqLpvSZnpvWRpQ0_35bgU92jnqL5r2EZt_yTcQH6NwsP_DQA2YYasNoMisglK4h6z8fg/exec"; 
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwiDEte6jlKgUhdcW9VTqbwI4_BpxLQRhfiB60NNuS7bKVwIbX5gIWRvzPx_hkFdpfGUg/exec"; 
 
 // --- CẤU HÌNH VIDEO HƯỚNG DẪN ---
 const YOUTUBE_VIDEO_ID = "ag0bHshpQ4U"; // ID video từ link bạn gửi
