@@ -1,20 +1,23 @@
 import { GoogleGenAI } from "@google/genai";
 import { GeneratedNLSContent } from "../types";
 
-export const generateCompetencyIntegration = async (prompt: string): Promise<GeneratedNLSContent> => {
-  if (!process.env.API_KEY) {
-    throw new Error("API Key chưa được cấu hình trong biến môi trường (.env)");
+// CẬP NHẬT: Thêm tham số apiKey vào hàm
+export const generateCompetencyIntegration = async (prompt: string, apiKey: string): Promise<GeneratedNLSContent> => {
+  // CẬP NHẬT: Kiểm tra apiKey được truyền vào thay vì process.env
+  if (!apiKey) {
+    throw new Error("API Key chưa được cung cấp. Vui lòng nhập Key trong phần Cấu hình.");
   }
 
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  // CẬP NHẬT: Khởi tạo AI với key của người dùng
+  const ai = new GoogleGenAI({ apiKey: apiKey });
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-2.5-flash', // Khuyên dùng bản 1.5-flash cho ổn định
       contents: prompt,
       config: {
         temperature: 0.5,
-        // Removed responseMimeType: "application/json" to allow free text format
+        // Removed responseMimeType to allow free text format logic below
       }
     });
 
@@ -25,12 +28,18 @@ export const generateCompetencyIntegration = async (prompt: string): Promise<Gen
     }
   } catch (error: any) {
     console.error("Gemini API Error:", error);
-    throw new Error(`Lỗi khi gọi Gemini API: ${error.message || error}`);
+    // Xử lý lỗi chi tiết hơn để hiển thị ra giao diện
+    const errorMessage = error.message || String(error);
+    if (errorMessage.includes("API key not valid")) {
+       throw new Error("API Key không hợp lệ. Vui lòng kiểm tra lại.");
+    }
+    throw new Error(`Lỗi khi gọi Gemini API: ${errorMessage}`);
   }
 };
 
 /**
  * Parses the custom delimited text format into the GeneratedNLSContent object
+ * (Giữ nguyên logic parse cũ của bạn)
  */
 function parseStructuredResponse(text: string): GeneratedNLSContent {
   const result: GeneratedNLSContent = {
