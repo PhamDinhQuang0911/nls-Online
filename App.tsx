@@ -1,18 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   FileUp, Wand2, FileCheck, Info, Download, 
-  BookOpen, Sparkles, Zap, ChevronRight, CheckCircle2, Terminal
+  BookOpen, Sparkles, Zap, ChevronRight, CheckCircle2, Terminal,
+  Key, Eye, EyeOff, ExternalLink // Thêm icon mới
 } from 'lucide-react';
 import { AppState, SubjectType, GradeType } from './types';
 import { extractTextFromDocx, createIntegrationTextPrompt } from './utils';
 import { generateCompetencyIntegration } from './services/geminiService';
 import { injectContentIntoDocx } from './services/docxManipulator';
 
-// --- CẤU HÌNH LOGO ỔN ĐỊNH ---
-// Đã chuyển sang dạng link Thumbnail (sz=w1000) để đảm bảo Google không bao giờ chặn
+// --- CẤU HÌNH LOGO ---
 const LOGO_URL = "https://drive.google.com/thumbnail?id=1zCnbX2ms0KkfftF20cGpevMQ9NN0GXF1&sz=w1000"; 
 
 const App: React.FC = () => {
+  // Thêm state cho API Key
+  const [apiKey, setApiKey] = useState('');
+  const [showKey, setShowKey] = useState(false);
+
   const [state, setState] = useState<AppState>({
     file: null,
     subject: '',
@@ -27,6 +31,19 @@ const App: React.FC = () => {
     },
     result: null
   });
+
+  // Load API Key từ LocalStorage khi mở web
+  useEffect(() => {
+    const savedKey = localStorage.getItem('USER_GEMINI_API_KEY');
+    if (savedKey) setApiKey(savedKey);
+  }, []);
+
+  // Lưu API Key khi người dùng nhập
+  const handleApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newKey = e.target.value;
+    setApiKey(newKey);
+    localStorage.setItem('USER_GEMINI_API_KEY', newKey);
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -47,6 +64,12 @@ const App: React.FC = () => {
   };
 
   const handleProcess = async () => {
+    // Kiểm tra API Key trước khi chạy
+    if (!apiKey.trim()) {
+        alert("Vui lòng nhập Google Gemini API Key để sử dụng!");
+        return;
+    }
+
     if (!state.file || !state.subject || !state.grade) {
         alert("Vui lòng điền đầy đủ thông tin!");
         return;
@@ -68,7 +91,8 @@ const App: React.FC = () => {
       addLog(">> Đang kết nối AI Teacher Assistant...");
       const prompt = createIntegrationTextPrompt(textContext, state.subject, state.grade);
       
-      const generatedContent = await generateCompetencyIntegration(prompt);
+      // Truyền apiKey vào hàm xử lý
+      const generatedContent = await generateCompetencyIntegration(prompt, apiKey);
       addLog("✓ AI đã thiết kế xong kịch bản Năng lực số.");
 
       addLog(">> Đang ghép nội dung vào file gốc...");
@@ -85,7 +109,7 @@ const App: React.FC = () => {
       }));
 
     } catch (error) {
-      addLog(`❌ Lỗi nghiêm trọng: ${error instanceof Error ? error.message : "Unknown error"}`);
+      addLog(`❌ Lỗi: ${error instanceof Error ? error.message : "Unknown error"}`);
       setState(prev => ({ ...prev, isProcessing: false }));
     }
   };
@@ -101,7 +125,7 @@ const App: React.FC = () => {
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         
-        {/* Header Section */}
+        {/* Header */}
         <header className="flex flex-col md:flex-row items-center justify-between gap-6 mb-10 bg-white/80 backdrop-blur-md p-4 rounded-3xl border border-white shadow-sm">
            <div className="flex items-center gap-5">
               <div className="relative group">
@@ -121,16 +145,13 @@ const App: React.FC = () => {
                     <style>{`.fallback-icon .icon-fallback { opacity: 1; }`}</style>
                 </div>
               </div>
-              
               <div className="text-center md:text-left">
-                {/* TÊN MỚI CHÍNH XÁC */}
                 <h1 className="text-xl md:text-3xl font-black text-slate-800 tracking-tight uppercase">
                   TÍCH HỢP <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-blue-600">NĂNG LỰC SỐ</span> TỰ ĐỘNG
                 </h1>
                 <p className="text-slate-500 font-medium text-sm mt-0.5">Giải pháp soạn giảng thông minh 2025</p>
               </div>
            </div>
-           
            <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-teal-50 rounded-full border border-teal-100 text-sm font-bold text-teal-700">
               <span className="w-2.5 h-2.5 rounded-full bg-teal-500 animate-pulse"></span>
               Sẵn sàng hoạt động
@@ -139,23 +160,62 @@ const App: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
-          {/* LEFT COLUMN */}
+          {/* LEFT COLUMN: Input & Config */}
           <div className="lg:col-span-7 space-y-6">
             
             {/* Main Banner Card */}
             <div className="bg-gradient-to-br from-teal-600 to-blue-600 rounded-[2rem] p-8 text-white shadow-2xl shadow-teal-900/20 relative overflow-hidden">
+               {/* Decoration */}
                <div className="absolute top-0 right-0 -mr-10 -mt-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
                <div className="absolute bottom-0 left-0 -ml-10 -mb-10 w-40 h-40 bg-teal-400/20 rounded-full blur-2xl"></div>
 
                <div className="relative z-10">
+                  
+                  {/* --- PHẦN NHẬP API KEY MỚI --- */}
+                  <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-5 mb-8">
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="text-xs font-bold text-teal-100 uppercase tracking-wider flex items-center gap-2">
+                            <Key className="w-3 h-3" /> Cấu hình Gemini API Key
+                        </label>
+                        <a 
+                            href="https://aistudio.google.com/app/apikey" 
+                            target="_blank" 
+                            rel="noreferrer"
+                            className="text-[10px] bg-white/20 hover:bg-white/30 text-white px-2 py-1 rounded-full flex items-center gap-1 transition-colors"
+                        >
+                            Chưa có Key? Lấy tại đây <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                      <div className="relative">
+                          <input 
+                            type={showKey ? "text" : "password"}
+                            value={apiKey}
+                            onChange={handleApiKeyChange}
+                            placeholder="Dán mã khóa AIza... của bạn vào đây"
+                            className="w-full pl-4 pr-10 py-3 bg-black/20 border border-white/10 rounded-xl text-white placeholder-teal-100/50 focus:bg-black/30 outline-none transition-all font-mono text-sm"
+                          />
+                          <button 
+                            onClick={() => setShowKey(!showKey)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-teal-100/70 hover:text-white transition-colors"
+                          >
+                            {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                      </div>
+                      <p className="text-[10px] text-teal-100/70 mt-2 italic">
+                        * Key được lưu an toàn trên trình duyệt của bạn. Hệ thống không thu thập.
+                      </p>
+                  </div>
+                  {/* ----------------------------- */}
+
                   <div className="flex items-center gap-3 mb-6">
                       <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg">
                         <Zap className="w-6 h-6 text-white" />
                       </div>
-                      <h2 className="text-xl font-bold">Thiết lập thông tin</h2>
+                      <h2 className="text-xl font-bold">Thiết lập bài dạy</h2>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                      {/* Select Môn */}
                       <div className="space-y-1">
                         <label className="text-xs font-bold text-teal-100 uppercase tracking-wider ml-1">Môn học</label>
                         <div className="relative">
@@ -181,6 +241,7 @@ const App: React.FC = () => {
                         </div>
                       </div>
 
+                      {/* Select Khối */}
                       <div className="space-y-1">
                         <label className="text-xs font-bold text-teal-100 uppercase tracking-wider ml-1">Khối lớp</label>
                         <div className="relative">
@@ -203,6 +264,7 @@ const App: React.FC = () => {
                       </div>
                   </div>
 
+                   {/* Upload Zone */}
                    <div className="group/upload relative">
                       <input type="file" id="file-upload" accept=".docx" className="hidden" onChange={handleFileChange} />
                       <label 
@@ -239,6 +301,7 @@ const App: React.FC = () => {
                </div>
             </div>
 
+            {/* Main Button */}
             <button
               disabled={!state.file || state.isProcessing}
               onClick={handleProcess}
@@ -261,6 +324,7 @@ const App: React.FC = () => {
               )}
             </button>
 
+            {/* Success Result */}
             {state.result && (
               <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-center justify-between gap-4 animate-in slide-in-from-bottom-2 shadow-sm">
                  <div className="flex items-center gap-4">
@@ -291,7 +355,6 @@ const App: React.FC = () => {
           {/* RIGHT COLUMN: Terminal & Tips */}
           <div className="lg:col-span-5 flex flex-col gap-6">
              <div className="bg-[#1e293b] rounded-[2rem] p-6 shadow-xl relative overflow-hidden flex flex-col min-h-[450px] border border-slate-700">
-                
                 <div className="flex gap-2 mb-4 items-center border-b border-slate-700 pb-4">
                    <div className="w-3 h-3 rounded-full bg-red-400"></div>
                    <div className="w-3 h-3 rounded-full bg-amber-400"></div>
@@ -335,9 +398,9 @@ const App: React.FC = () => {
                 </h4>
                 <div className="space-y-2">
                    {[
+                      "Mỗi người dùng nên sử dụng API Key riêng.",
                       "File không được đặt mật khẩu.",
                       "Giữ nguyên công thức MathType & Hình ảnh.",
-                      "Nội dung NLS mới có màu đỏ."
                    ].map((tip, i) => (
                       <div key={i} className="flex items-start gap-2 text-sm text-slate-600">
                          <div className="w-1.5 h-1.5 rounded-full bg-teal-400 mt-1.5 shrink-0"></div>
@@ -347,7 +410,6 @@ const App: React.FC = () => {
                 </div>
              </div>
           </div>
-
         </div>
       </div>
     </div>
