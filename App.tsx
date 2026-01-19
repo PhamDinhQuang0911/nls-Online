@@ -8,8 +8,8 @@ import { extractTextFromDocx, createIntegrationTextPrompt } from './utils';
 import { generateCompetencyIntegration } from './services/geminiService';
 import { injectContentIntoDocx } from './services/docxManipulator';
 
-// --- CẤU HÌNH LOGO ---
-const LOGO_URL = "https://drive.google.com/uc?export=view&id=1zCnbX2ms0KkfftF20cGpevMQ9NN0GXF1"; 
+// --- CẤU HÌNH LOGO (Đã sửa link sang CDN để không bị lỗi ảnh) ---
+const LOGO_URL = "https://lh3.googleusercontent.com/d/1zCnbX2ms0KkfftF20cGpevMQ9NN0GXF1"; 
 
 const App: React.FC = () => {
   const [state, setState] = useState<AppState>({
@@ -90,10 +90,10 @@ const App: React.FC = () => {
   };
 
   return (
-    // Đổi background sang tông Xanh Teal/Blue nhạt
+    // Background tông Xanh Teal/Blue nhạt như giao diện mẫu
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800 selection:bg-teal-500 selection:text-white pb-20 relative overflow-x-hidden">
       
-      {/* Background blobs mới (Tông xanh) */}
+      {/* Background blobs mới */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-teal-200/30 blur-[120px] animate-pulse-slow"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-blue-200/30 blur-[120px] animate-pulse-slow delay-1000"></div>
@@ -105,12 +105,13 @@ const App: React.FC = () => {
         <header className="flex flex-col md:flex-row items-center justify-between gap-6 mb-10 bg-white/80 backdrop-blur-md p-4 rounded-3xl border border-white shadow-sm">
            <div className="flex items-center gap-5">
               <div className="relative group">
-                {/* Glow effect chuyển sang màu Teal */}
                 <div className="absolute inset-0 bg-gradient-to-r from-teal-400 to-blue-500 rounded-2xl blur opacity-25 group-hover:opacity-50 transition-opacity duration-500"></div>
                 <div className="relative w-16 h-16 bg-white rounded-2xl shadow-md flex items-center justify-center overflow-hidden border border-slate-100 p-1">
+                    {/* QUAN TRỌNG: Thêm referrerPolicy="no-referrer" để Google không chặn ảnh */}
                     <img 
                       src={LOGO_URL} 
                       alt="Logo" 
+                      referrerPolicy="no-referrer"
                       className="w-full h-full object-contain hover:scale-110 transition-transform duration-500"
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
@@ -140,9 +141,8 @@ const App: React.FC = () => {
           {/* LEFT COLUMN */}
           <div className="lg:col-span-7 space-y-6">
             
-            {/* Main Banner Card - Màu Gradient Teal -> Blue như ảnh mẫu */}
+            {/* Main Banner Card */}
             <div className="bg-gradient-to-br from-teal-600 to-blue-600 rounded-[2rem] p-8 text-white shadow-2xl shadow-teal-900/20 relative overflow-hidden">
-               {/* Decorative Circles */}
                <div className="absolute top-0 right-0 -mr-10 -mt-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
                <div className="absolute bottom-0 left-0 -ml-10 -mb-10 w-40 h-40 bg-teal-400/20 rounded-full blur-2xl"></div>
 
@@ -202,7 +202,6 @@ const App: React.FC = () => {
                       </div>
                   </div>
 
-                   {/* Upload Zone - Style trắng nổi bật trên nền xanh */}
                    <div className="group/upload relative">
                       <input type="file" id="file-upload" accept=".docx" className="hidden" onChange={handleFileChange} />
                       <label 
@@ -239,14 +238,13 @@ const App: React.FC = () => {
                </div>
             </div>
 
-            {/* Main Action Button */}
             <button
               disabled={!state.file || state.isProcessing}
               onClick={handleProcess}
               className={`w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 transition-all transform active:scale-[0.98] shadow-lg
                 ${!state.file || state.isProcessing 
                     ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none' 
-                    : 'bg-white text-teal-700 hover:bg-teal-50 border-2 border-teal-100' // Nút trắng viền xanh
+                    : 'bg-white text-teal-700 hover:bg-teal-50 border-2 border-teal-100'
                 }`}
             >
               {state.isProcessing ? (
@@ -262,7 +260,6 @@ const App: React.FC = () => {
               )}
             </button>
 
-            {/* Result Notification */}
             {state.result && (
               <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-center justify-between gap-4 animate-in slide-in-from-bottom-2 shadow-sm">
                  <div className="flex items-center gap-4">
@@ -292,7 +289,6 @@ const App: React.FC = () => {
 
           {/* RIGHT COLUMN: Terminal & Tips */}
           <div className="lg:col-span-5 flex flex-col gap-6">
-             {/* Terminal Window - Giữ màu tối để chuyên nghiệp nhưng chỉnh viền xanh */}
              <div className="bg-[#1e293b] rounded-[2rem] p-6 shadow-xl relative overflow-hidden flex flex-col min-h-[450px] border border-slate-700">
                 
                 <div className="flex gap-2 mb-4 items-center border-b border-slate-700 pb-4">
@@ -332,7 +328,6 @@ const App: React.FC = () => {
                 </div>
              </div>
 
-             {/* Tips Card - Style nhẹ nhàng */}
              <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
                 <h4 className="font-bold text-slate-800 mb-3 flex items-center gap-2 text-sm uppercase tracking-wide text-teal-700">
                     <Info className="w-4 h-4" /> Lưu ý
