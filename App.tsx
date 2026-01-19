@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
 import { 
   FileUp, Wand2, FileCheck, Info, Download, 
-  BookOpen, Sparkles, Zap, ChevronRight, CheckCircle2, AlertCircle, Terminal
+  BookOpen, Sparkles, Zap, ChevronRight, CheckCircle2, Terminal
 } from 'lucide-react';
 import { AppState, SubjectType, GradeType } from './types';
 import { extractTextFromDocx, createIntegrationTextPrompt } from './utils';
 import { generateCompetencyIntegration } from './services/geminiService';
 import { injectContentIntoDocx } from './services/docxManipulator';
 
-// --- CẤU HÌNH LOGO Ở ĐÂY ---
-// Hãy thay ID ảnh Google Drive của bạn vào phía sau dấu "="
-const LOGO_URL = "https://drive.google.com/uc?export=view&id=1jC3-XU_18Cj-C8_X-1jC3-XU_18Cj-C8"; 
-// Nếu chưa có ảnh, nó sẽ hiện icon mặc định.
+// --- CẤU HÌNH LOGO MỚI ---
+// Đã cập nhật link Direct từ Google Drive của bạn
+const LOGO_URL = "https://drive.google.com/uc?export=view&id=1zCnbX2ms0KkfftF20cGpevMQ9NN0GXF1"; 
 
 const App: React.FC = () => {
   const [state, setState] = useState<AppState>({
@@ -92,49 +91,47 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-indigo-200 via-slate-100 to-indigo-200 font-sans text-slate-800 selection:bg-indigo-500 selection:text-white pb-20">
+    <div className="min-h-screen bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-indigo-100 via-white to-purple-100 font-sans text-slate-800 selection:bg-indigo-500 selection:text-white pb-20">
       
       {/* Background decoration */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-purple-400/20 blur-[100px] animate-pulse-slow"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-400/20 blur-[100px] animate-pulse-slow delay-1000"></div>
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-purple-300/20 blur-[100px] animate-pulse-slow"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-300/20 blur-[100px] animate-pulse-slow delay-1000"></div>
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
         
         {/* Header Section */}
         <header className="flex flex-col md:flex-row items-center justify-between gap-6 mb-12">
-           <div className="flex items-center gap-4">
+           <div className="flex items-center gap-5">
               <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-violet-600 rounded-2xl blur opacity-30 group-hover:opacity-60 transition-opacity duration-500"></div>
-                <div className="relative w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center overflow-hidden border border-white/50">
+                <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-violet-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition-opacity duration-500"></div>
+                <div className="relative w-20 h-20 bg-white rounded-2xl shadow-xl flex items-center justify-center overflow-hidden border border-white/60 p-2">
                     {/* LOGO DISPLAY */}
                     <img 
                       src={LOGO_URL} 
-                      alt="Logo" 
-                      className="w-full h-full object-cover"
+                      alt="Logo Trường" 
+                      className="w-full h-full object-contain hover:scale-110 transition-transform duration-500"
                       onError={(e) => {
-                        // Fallback nếu link ảnh lỗi
                         e.currentTarget.style.display = 'none';
                         e.currentTarget.parentElement?.classList.add('fallback-icon');
                       }}
                     />
-                    {/* Icon dự phòng nếu ảnh lỗi */}
                     <Sparkles className="w-8 h-8 text-indigo-600 absolute opacity-0 icon-fallback" />
                     <style>{`.fallback-icon .icon-fallback { opacity: 1; }`}</style>
                 </div>
               </div>
               <div className="text-center md:text-left">
-                <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">
+                <h1 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">
                   NLS <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-pink-600">Integrator</span> Pro
                 </h1>
-                <p className="text-slate-500 font-medium text-sm">Trợ lý AI tích hợp Năng lực số 2025</p>
+                <p className="text-slate-500 font-medium text-base mt-1">Trợ lý AI tích hợp Năng lực số 2025</p>
               </div>
            </div>
            
            <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-white/60 backdrop-blur-md rounded-full border border-white shadow-sm text-sm font-semibold text-slate-600">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-              System Online
+              System Online v3.0
            </div>
         </header>
 
@@ -142,10 +139,10 @@ const App: React.FC = () => {
           
           {/* LEFT COLUMN: Input & Config */}
           <div className="lg:col-span-7 space-y-6">
-            <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] p-8 border border-white/40 shadow-2xl shadow-indigo-500/10 transition-all hover:shadow-indigo-500/20">
+            <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] p-8 border border-white/40 shadow-2xl shadow-indigo-500/10 transition-all hover:shadow-indigo-500/15 group/card">
                
                <div className="flex items-center gap-3 mb-8">
-                  <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
+                  <div className="p-3 bg-gradient-to-br from-indigo-50 to-indigo-100 text-indigo-600 rounded-xl shadow-inner">
                     <Zap className="w-6 h-6" />
                   </div>
                   <h2 className="text-xl font-bold text-slate-800">Thiết lập bài dạy</h2>
@@ -155,9 +152,9 @@ const App: React.FC = () => {
                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Môn học</label>
-                    <div className="relative">
+                    <div className="relative group/select">
                       <select 
-                        className="w-full p-4 pl-4 pr-10 bg-white border-2 border-slate-100 rounded-2xl appearance-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 outline-none transition-all font-medium text-slate-700"
+                        className="w-full p-4 pl-4 pr-10 bg-white border-2 border-slate-100 rounded-2xl appearance-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 outline-none transition-all font-medium text-slate-700 cursor-pointer hover:border-indigo-300"
                         value={state.subject}
                         onChange={(e) => setState(prev => ({...prev, subject: e.target.value as SubjectType}))}
                       >
@@ -174,15 +171,15 @@ const App: React.FC = () => {
                         <option value="Địa lý">Địa lý</option>
                         <option value="GDCD">GDCD</option>
                       </select>
-                      <BookOpen className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
+                      <BookOpen className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none group-hover/select:text-indigo-500 transition-colors" />
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Khối lớp</label>
-                    <div className="relative">
+                    <div className="relative group/select">
                       <select 
-                        className="w-full p-4 pl-4 pr-10 bg-white border-2 border-slate-100 rounded-2xl appearance-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 outline-none transition-all font-medium text-slate-700"
+                        className="w-full p-4 pl-4 pr-10 bg-white border-2 border-slate-100 rounded-2xl appearance-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 outline-none transition-all font-medium text-slate-700 cursor-pointer hover:border-indigo-300"
                         value={state.grade}
                         onChange={(e) => setState(prev => ({...prev, grade: e.target.value as GradeType}))}
                       >
@@ -195,7 +192,7 @@ const App: React.FC = () => {
                         <option value="Lớp 11">Lớp 11 (NC1)</option>
                         <option value="Lớp 12">Lớp 12 (NC1)</option>
                       </select>
-                      <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none rotate-90" />
+                      <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none rotate-90 group-hover/select:text-indigo-500 transition-colors" />
                     </div>
                   </div>
                </div>
@@ -211,31 +208,35 @@ const App: React.FC = () => {
                   />
                   <label 
                     htmlFor="file-upload"
-                    className={`flex flex-col items-center justify-center w-full h-40 border-3 border-dashed rounded-3xl cursor-pointer transition-all duration-300
+                    className={`flex flex-col items-center justify-center w-full h-40 border-3 border-dashed rounded-3xl cursor-pointer transition-all duration-300 relative overflow-hidden
                       ${state.file 
-                        ? 'bg-indigo-50/50 border-indigo-400' 
-                        : 'bg-slate-50 border-slate-200 hover:bg-white hover:border-indigo-300 hover:shadow-lg'
+                        ? 'bg-indigo-50/60 border-indigo-400' 
+                        : 'bg-slate-50 border-slate-200 hover:bg-white hover:border-indigo-400 hover:shadow-lg'
                       }`}
                   >
                     {state.file ? (
-                      <div className="flex items-center gap-4 animate-in fade-in zoom-in duration-300">
-                        <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center">
-                           <FileCheck className="w-6 h-6" />
+                      <div className="flex items-center gap-4 animate-in fade-in zoom-in duration-300 z-10">
+                        <div className="w-14 h-14 bg-white text-indigo-600 rounded-2xl shadow-sm flex items-center justify-center">
+                           <FileCheck className="w-7 h-7" />
                         </div>
                         <div className="text-left">
-                           <p className="font-bold text-indigo-900 line-clamp-1">{state.file.name}</p>
-                           <p className="text-xs text-indigo-500 font-medium">Sẵn sàng xử lý</p>
+                           <p className="font-bold text-indigo-900 text-lg line-clamp-1">{state.file.name}</p>
+                           <p className="text-sm text-indigo-500 font-medium">Sẵn sàng xử lý • {Math.round(state.file.size/1024)} KB</p>
                         </div>
                       </div>
                     ) : (
-                      <div className="text-center space-y-2">
-                        <div className="w-12 h-12 bg-white text-slate-400 rounded-full shadow-sm flex items-center justify-center mx-auto group-hover/upload:text-indigo-500 group-hover/upload:scale-110 transition-transform">
-                          <FileUp className="w-6 h-6" />
+                      <div className="text-center space-y-3 z-10">
+                        <div className="w-14 h-14 bg-white text-slate-400 rounded-full shadow-sm flex items-center justify-center mx-auto group-hover/upload:text-indigo-600 group-hover/upload:scale-110 transition-all duration-300">
+                          <FileUp className="w-7 h-7" />
                         </div>
-                        <p className="text-slate-600 font-medium">Tải lên file Word (.docx)</p>
-                        <p className="text-xs text-slate-400">Hỗ trợ MathType & Công thức</p>
+                        <div>
+                            <p className="text-slate-700 font-bold text-lg group-hover/upload:text-indigo-700 transition-colors">Tải lên Giáo án (.docx)</p>
+                            <p className="text-xs text-slate-400 mt-1">Hỗ trợ MathType & Công thức</p>
+                        </div>
                       </div>
                     )}
+                    {/* Hover effect background */}
+                    <div className="absolute inset-0 bg-gradient-to-tr from-indigo-100/0 via-white/0 to-indigo-100/50 opacity-0 group-hover/upload:opacity-100 transition-opacity pointer-events-none"/>
                   </label>
                </div>
 
@@ -243,36 +244,36 @@ const App: React.FC = () => {
                <button
                   disabled={!state.file || state.isProcessing}
                   onClick={handleProcess}
-                  className={`mt-8 w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition-all transform active:scale-[0.98] relative overflow-hidden group
+                  className={`mt-8 w-full py-5 rounded-2xl font-bold text-xl flex items-center justify-center gap-3 transition-all transform active:scale-[0.98] relative overflow-hidden group
                     ${!state.file || state.isProcessing 
                         ? 'bg-slate-100 text-slate-400 cursor-not-allowed' 
-                        : 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-xl shadow-indigo-500/40 hover:shadow-indigo-500/60'
+                        : 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-xl shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:to-indigo-600'
                     }`}
                 >
                   {state.isProcessing ? (
-                     <div className="flex items-center gap-2">
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                     <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin" />
                         <span>Đang phân tích AI...</span>
                      </div>
                   ) : (
                      <>
-                        <Wand2 className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-                        <span>Tích hợp Năng lực số</span>
+                        <Wand2 className="w-6 h-6 group-hover:rotate-12 transition-transform" />
+                        <span>Tích hợp Năng lực số ngay</span>
                      </>
                   )}
                 </button>
             </div>
 
-            {/* Result Notification */}
+            {/* Success Result Card */}
             {state.result && (
-              <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-3xl p-1 shadow-xl animate-in slide-in-from-bottom-5">
-                 <div className="bg-white rounded-[1.4rem] p-6 flex flex-col md:flex-row items-center gap-6">
-                    <div className="w-14 h-14 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center shrink-0">
-                       <Sparkles className="w-7 h-7" />
+              <div className="bg-gradient-to-r from-green-400 to-emerald-600 rounded-[2rem] p-1 shadow-xl animate-in slide-in-from-bottom-5 duration-500">
+                 <div className="bg-white rounded-[1.8rem] p-6 flex flex-col md:flex-row items-center gap-6">
+                    <div className="w-16 h-16 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center shrink-0 shadow-inner">
+                       <Sparkles className="w-8 h-8" />
                     </div>
                     <div className="flex-1 text-center md:text-left">
-                       <h3 className="text-lg font-bold text-slate-800">Thành công!</h3>
-                       <p className="text-slate-500 text-sm">Giáo án mới đã sẵn sàng tải về.</p>
+                       <h3 className="text-xl font-bold text-slate-800">Thành công!</h3>
+                       <p className="text-slate-500 font-medium">Giáo án mới đã được tích hợp đầy đủ.</p>
                     </div>
                     <button 
                        onClick={() => {
@@ -282,81 +283,87 @@ const App: React.FC = () => {
                              a.href = url; a.download = state.result.fileName; a.click();
                           }
                        }}
-                       className="px-6 py-3 bg-slate-900 text-white rounded-xl font-bold flex items-center gap-2 hover:bg-slate-800 transition-colors shadow-lg"
+                       className="px-8 py-4 bg-slate-900 text-white rounded-xl font-bold flex items-center gap-2 hover:bg-slate-800 transition-all shadow-lg hover:-translate-y-1"
                     >
-                       <Download className="w-4 h-4" /> Tải về ngay
+                       <Download className="w-5 h-5" /> Tải về máy
                     </button>
                  </div>
               </div>
             )}
           </div>
 
-          {/* RIGHT COLUMN: Terminal Logs */}
+          {/* RIGHT COLUMN: Terminal Logs & Info */}
           <div className="lg:col-span-5 flex flex-col gap-6">
-             <div className="bg-slate-900 rounded-[2rem] p-6 shadow-2xl relative overflow-hidden flex flex-col min-h-[500px] border border-slate-800">
-                {/* Mac OS window controls decoration */}
-                <div className="flex gap-2 mb-6">
-                   <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
-                   <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
-                   <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
-                </div>
-
-                <div className="flex items-center gap-2 text-slate-400 text-xs font-mono mb-4 border-b border-slate-800 pb-4 uppercase tracking-widest">
-                   <Terminal className="w-4 h-4" /> System Console
+             {/* Terminal Window */}
+             <div className="bg-[#0f172a] rounded-[2rem] p-6 shadow-2xl relative overflow-hidden flex flex-col min-h-[500px] border border-slate-800/50 group/terminal">
+                
+                {/* Window Controls */}
+                <div className="flex gap-2 mb-6 items-center">
+                   <div className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-400 transition-colors"></div>
+                   <div className="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-400 transition-colors"></div>
+                   <div className="w-3 h-3 rounded-full bg-green-500 hover:bg-green-400 transition-colors"></div>
+                   <div className="ml-auto flex items-center gap-2 text-slate-500 text-xs font-mono uppercase tracking-widest bg-slate-800/50 px-3 py-1 rounded-full">
+                      <Terminal className="w-3 h-3" /> Console
+                   </div>
                 </div>
                 
-                <div className="flex-1 font-mono text-sm overflow-y-auto custom-scrollbar space-y-3 pr-2">
+                {/* Log Content */}
+                <div className="flex-1 font-mono text-sm overflow-y-auto custom-scrollbar space-y-3 pr-2 scroll-smooth">
                    {state.logs.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center h-full text-slate-700 space-y-3 opacity-50">
-                          <div className="w-12 h-12 border-2 border-slate-800 rounded-xl flex items-center justify-center border-dashed">
-                             <Info className="w-6 h-6" />
+                      <div className="flex flex-col items-center justify-center h-full text-slate-700 space-y-4 opacity-40">
+                          <div className="w-16 h-16 border-2 border-slate-700 rounded-2xl flex items-center justify-center border-dashed animate-pulse">
+                             <Info className="w-8 h-8" />
                           </div>
-                          <p>Waiting for user input...</p>
+                          <p className="text-center font-medium">Ready to process...</p>
                       </div>
                    ) : (
                       state.logs.map((log, i) => (
-                         <div key={i} className="flex gap-3 animate-in fade-in slide-in-from-left-2 duration-300">
-                            <span className="text-indigo-500 shrink-0 select-none">$</span>
+                         <div key={i} className="flex gap-3 animate-in fade-in slide-in-from-left-4 duration-300">
+                            <span className="text-indigo-500 shrink-0 select-none mt-0.5">$</span>
                             <span className={`${
-                               log.includes("Lỗi") ? "text-red-400" : 
-                               log.includes("✓") || log.includes("✨") ? "text-green-400" : "text-slate-300"
-                            } break-words`}>
-                               {log}
+                               log.includes("Lỗi") ? "text-red-400 font-bold" : 
+                               log.includes("✓") || log.includes("✨") ? "text-green-400 font-semibold" : 
+                               log.includes(">>") ? "text-blue-300" : "text-slate-300"
+                            } break-words leading-relaxed`}>
+                               {log.replace(">>", "")}
                             </span>
                          </div>
                       ))
                    )}
                    {state.isProcessing && (
-                       <div className="flex gap-2 items-center text-indigo-400 mt-2 animate-pulse">
-                           <span>_</span>
+                       <div className="flex gap-2 items-center text-indigo-400 mt-2 animate-pulse pl-5">
+                           <span className="w-2 h-4 bg-indigo-500 block"></span>
                        </div>
                    )}
                 </div>
 
                 {/* Status Bar */}
-                <div className="mt-4 pt-4 border-t border-slate-800 flex justify-between items-center text-[10px] text-slate-500 font-mono uppercase">
-                   <span>Status: {state.isProcessing ? "PROCESSING" : "IDLE"}</span>
-                   <span>V2.5.0 STABLE</span>
+                <div className="mt-4 pt-4 border-t border-slate-800/50 flex justify-between items-center text-[10px] text-slate-500 font-mono uppercase">
+                   <span className="flex items-center gap-2">
+                      <span className={`w-2 h-2 rounded-full ${state.isProcessing ? "bg-yellow-500 animate-pulse" : "bg-green-500"}`}></span>
+                      {state.isProcessing ? "PROCESSING..." : "IDLE"}
+                   </span>
+                   <span>React + Gemini 1.5</span>
                 </div>
              </div>
 
              {/* Helper Tips */}
-             <div className="bg-white/60 backdrop-blur-md rounded-3xl p-6 border border-white/50 shadow-lg">
-                <h4 className="font-bold text-slate-800 mb-3 flex items-center gap-2 text-sm uppercase tracking-wide">
-                    <Info className="w-4 h-4 text-indigo-500" /> Lưu ý quan trọng
+             <div className="bg-white/60 backdrop-blur-md rounded-3xl p-6 border border-white/60 shadow-lg">
+                <h4 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wide">
+                    <Info className="w-5 h-5 text-indigo-500" /> Lưu ý quan trọng
                 </h4>
-                <ul className="space-y-2">
+                <div className="space-y-3">
                    {[
                       "File Word không được đặt mật khẩu.",
-                      "Giữ nguyên các công thức MathType.",
+                      "Giữ nguyên các công thức MathType & Hình ảnh.",
                       "Nội dung NLS sẽ được chèn màu đỏ để dễ nhận biết."
                    ].map((tip, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-slate-600">
-                         <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
-                         <span>{tip}</span>
-                      </li>
+                      <div key={i} className="flex items-start gap-3 text-sm text-slate-600 bg-white/50 p-3 rounded-xl">
+                         <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0" />
+                         <span className="leading-snug">{tip}</span>
+                      </div>
                    ))}
-                </ul>
+                </div>
              </div>
           </div>
 
